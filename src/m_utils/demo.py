@@ -51,8 +51,7 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser ()
-    parser.add_argument ( '-d', nargs='+', dest='datasets', required=True,
-                          choices=['Shelf', 'Campus', 'ultimatum1'] )
+    parser.add_argument ( '-d', nargs='+', dest='datasets', required=True)
     parser.add_argument ( '-dumped', nargs='+', dest='dumped_dir', default=None )
     args = parser.parse_args ()
 
@@ -72,8 +71,12 @@ if __name__ == '__main__':
             gt_path = dataset_path
 
         else:
-            logger.error ( f"Unknown datasets name: {dataset_name}" )
-            exit ( -1 )
+            dataset_path = os.path.join(model_cfg.datasets_dir, dataset_name)
+            test_range = [_ for _ in range(300)]
+            gt_path = dataset_path
+            if not os.path.exists(dataset_path):
+                logger.error ( f"Unknown datasets name: {dataset_name}" )
+                exit ( -1 )
 
         # read the camera parameter of this dataset
         with open ( osp.join ( dataset_path, 'camera_parameter.pickle' ),
