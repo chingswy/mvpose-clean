@@ -3,6 +3,7 @@ import os.path as osp
 import pickle
 import sys
 import time
+import cv2
 
 project_root = os.path.abspath ( os.path.join ( os.path.dirname ( __file__ ), '..', '..' ) )
 if __name__ == '__main__':
@@ -38,8 +39,14 @@ def export(model, loader, is_info_dicts=False, show=False):
             poses3d = model._estimate3d ( 0, show=show )
         else:
             this_imgs = list ()
-            for img_batch in imgs:
-                this_imgs.append ( img_batch.squeeze ().numpy () )
+            # undistort here
+            for iimg, img_batch in enumerate(imgs):
+                frame = img_batch.squeeze ().numpy ()
+                if 'distCoef' in camera_parameter.keys():
+                    mtx = camera_parameter['K'][iimg]
+                    dist = camera_parameter['distCoef'][iimg]
+                    frame = cv2.undistort(frame, mtx, dist, None)
+                this_imgs.append (frame)
             poses3d = model.predict ( imgs=this_imgs, camera_parameter=camera_parameter, template_name='Unified',
                                           show=show, plt_id=img_id )
 
